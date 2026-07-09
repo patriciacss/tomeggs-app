@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import styles from './BackupPage.module.css'
 import { useSync } from '../hooks/useSync'
 import { authService } from '../services/authService'
+import { storageService } from '../storage/storageService'
 
 function formatSyncTime(iso: string | null): string {
   if (!iso) return 'Nunca sincronizado'
@@ -38,6 +39,16 @@ export function BackupPage() {
     const confirmed = window.confirm('Sair da conta? Os dados continuam salvos neste aparelho.')
     if (!confirmed) return
     void authService.signOut()
+  }
+
+  function handleClearLocalData() {
+    const confirmed = window.confirm(
+      'Apagar todos os dados salvos neste aparelho (clientes, vendas, visitas e fila de sincronização)? ' +
+        'Isso não apaga nada da nuvem — na próxima sincronização, os dados são baixados de novo do Supabase.',
+    )
+    if (!confirmed) return
+    storageService.clearAll()
+    window.location.reload()
   }
 
   async function handleSync() {
@@ -105,6 +116,17 @@ export function BackupPage() {
             </Button>
           </Card>
         )}
+
+        <Card>
+          <h2 className={styles.title}>Solução de problemas</h2>
+          <p className={styles.description}>
+            Se este aparelho estiver mostrando dados desatualizados ou clientes que já foram excluídos em
+            outro lugar, isso pode limpar o problema. Nada é apagado da nuvem.
+          </p>
+          <Button variant="danger" fullWidth onClick={handleClearLocalData}>
+            Limpar dados locais deste aparelho
+          </Button>
+        </Card>
       </div>
     </div>
   )

@@ -77,4 +77,11 @@ export const storageService = {
       }
     }
   },
+
+  /** Apaga todos os dados locais conhecidos do app (mantém a sessão de login). */
+  clearAll(): void {
+    for (const key of Object.values(STORAGE_KEYS)) {
+      window.localStorage.removeItem(key)
+    }
+  },
 }
