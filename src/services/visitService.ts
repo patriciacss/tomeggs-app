@@ -59,6 +59,15 @@ function removeByClient(clientId: string): void {
   }
 }
 
+/** Remove visitas cujo cliente não existe mais (limpeza de dados órfãos). */
+function removeOrphans(validClientIds: Set<string>): void {
+  for (const visit of getAll()) {
+    if (!validClientIds.has(visit.clientId)) {
+      remove(visit.id)
+    }
+  }
+}
+
 export const visitService = {
   getAll,
   getByDate,
@@ -67,4 +76,5 @@ export const visitService = {
   markVisited,
   remove,
   removeByClient,
+  removeOrphans,
 }

@@ -56,6 +56,15 @@ function removeByClient(clientId: string): void {
   }
 }
 
+/** Remove vendas cujo cliente não existe mais (limpeza de dados órfãos). */
+function removeOrphans(validClientIds: Set<string>): void {
+  for (const sale of getAll()) {
+    if (!validClientIds.has(sale.clientId)) {
+      remove(sale.id)
+    }
+  }
+}
+
 /** Marca uma venda como paga, informando a forma de pagamento usada. */
 function markPaid(id: string, paymentMethod: PaymentMethod): Sale | undefined {
   const sales = getAll()
@@ -99,6 +108,7 @@ export const saleService = {
   add,
   remove,
   removeByClient,
+  removeOrphans,
   markPaid,
   groupByDate,
   totalPending,

@@ -345,6 +345,12 @@ async function pullRemote(): Promise<void> {
   mergeSales((salesResult.data ?? []) as DbSale[])
   mergeVisits((visitsResult.data ?? []) as DbVisit[])
 
+  // Remove vendas/visitas órfãs (cliente já não existe mais), tanto local
+  // quanto na nuvem — cobre exclusões antigas que ficaram incompletas.
+  const validClientIds = new Set(clientService.getAll().map((client) => client.id))
+  saleService.removeOrphans(validClientIds)
+  visitService.removeOrphans(validClientIds)
+
   storageService.set(STORAGE_KEYS.lastSyncAt, new Date().toISOString())
 }
 
