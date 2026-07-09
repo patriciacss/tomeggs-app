@@ -45,6 +45,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  width: fit-content;
 }
 
 .handle {

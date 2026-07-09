@@ -3,6 +3,7 @@ import { ScreenHeader } from '../components/ui/ScreenHeader'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { SaleQuickModal } from '../components/SaleQuickModal'
+import { MapChooserModal } from '../components/MapChooserModal'
 import { EggBasketIcon } from '../components/FarmIcons'
 import styles from './ClientDetailPage.module.css'
 import { useClient } from '../hooks/useClient'
@@ -28,6 +29,7 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
   const { client } = useClient(clientId)
   const { sales, markSalePaid, refresh: refreshSales } = useSales(clientId)
   const [showSaleModal, setShowSaleModal] = useState(false)
+  const [showMap, setShowMap] = useState(false)
 
   if (!client) {
     return (
@@ -92,7 +94,7 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
           )}
 
           {client.address && (
-            <p className={styles.infoLine}>
+            <button type="button" className={styles.infoLineButton} onClick={() => setShowMap(true)}>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" className={styles.infoIcon}>
                 <path
                   d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"
@@ -103,7 +105,7 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
                 <circle cx="12" cy="9.5" r="2.3" stroke="currentColor" strokeWidth="2" />
               </svg>
               {client.address}
-            </p>
+            </button>
           )}
 
           <div className={styles.dayChips}>
@@ -191,6 +193,10 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
             setShowSaleModal(false)
           }}
         />
+      )}
+
+      {showMap && client.address && (
+        <MapChooserModal address={client.address} onClose={() => setShowMap(false)} />
       )}
     </div>
   )

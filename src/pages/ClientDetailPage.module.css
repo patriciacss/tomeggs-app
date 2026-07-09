@@ -57,6 +57,23 @@
   color: var(--color-yolk-dark);
 }
 
+.infoLineButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-size: 15px;
+  color: var(--color-ink);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
 .dayChips {
   display: flex;
   flex-wrap: wrap;
