@@ -1,0 +1,15 @@
+.content {
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.error {
+  font-size: 14px;
+  color: var(--color-clay);
+  font-weight: 600;
+}

@@ -1,0 +1,83 @@
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  background: linear-gradient(180deg, #fff9ec 0%, var(--color-bg) 55%, #ffcc7966 100%);
+}
+
+.logo {
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.75rem;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-weight: 800;
+  font-size: 30px;
+  text-align: center;
+  background: transparent;
+}
+
+.subtitle {
+  margin-top: 4px;
+  color: #6f6151;
+  text-align: center;
+  font-size: 14px;
+  max-width: 320px;
+}
+
+.card {
+  width: 100%;
+  max-width: 380px;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form label {
+  padding-left: 8px;
+}
+
+.submitButton {
+  margin-top: 16px;
+}
+
+.error {
+  color: var(--color-clay);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.offlineNotice {
+  color: var(--color-ink-soft);
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.offlineNotice strong {
+  color: var(--color-moss);
+}
+
+.setupHint {
+  margin-top: var(--space-4);
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  text-align: center;
+  line-height: 1.5;
+}

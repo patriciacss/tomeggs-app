@@ -1,0 +1,66 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  transition: transform 0.08s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.nameDone {
+  color: var(--color-ink-soft);
+  text-decoration: line-through;
+  font-weight: 600;
+}
+
+.address {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--color-line);
+  color: transparent;
+}
+
+.checkCircle.checked {
+  border-color: var(--color-moss);
+  color: var(--color-moss);
+}
+
+.arrowCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-yolk-dark);
+}
+
+.arrowCircle.arrowDone {
+  color: var(--color-ink-soft);
+}

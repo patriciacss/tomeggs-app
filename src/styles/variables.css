@@ -1,0 +1,37 @@
+/*
+  Paleta "fazendinha" (revisão clean): fundo off-white aquecido, verde
+  natureza para linhas/preenchimentos leves, laranja/ouro terroso como
+  destaque e progresso, e um marrom orgânico no lugar do preto puro.
+*/
+:root {
+  --color-bg: #FAF8F5;
+  --color-surface: #FFFFFF;
+  --color-surface-dim: #E6EFE4;
+  --color-ink: #5C4636;
+  --color-ink-soft: #8A7565;
+  --color-yolk: #E2953B;
+  --color-yolk-dark: #B9752E;
+  --color-clay: #C1552C;
+  --color-moss: #7A8F75;
+  --color-sky: #5B8FBF;
+  --color-line: #7A8F75;
+
+  --font-display: 'Inter Tight', 'Segoe UI', sans-serif;
+  --font-body: 'Inter Tight', 'Segoe UI', sans-serif;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --shadow-card: 0 2px 10px rgba(43, 33, 24, 0.08);
+  --shadow-pressed: inset 0 2px 4px rgba(43, 33, 24, 0.15);
+
+  color-scheme: light;
+}

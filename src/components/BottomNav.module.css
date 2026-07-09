@@ -1,0 +1,32 @@
+.nav {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 4px;
+  background: var(--color-moss);
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0));
+  z-index: 10;
+}
+
+.item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: var(--radius-md);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.active {
+  background: var(--color-surface);
+  color: var(--color-moss);
+}

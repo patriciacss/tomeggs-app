@@ -1,0 +1,67 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  touch-action: pan-y;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dragging {
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 8px 20px rgba(43, 33, 24, 0.2);
+  transition: none;
+}
+
+.position {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-surface-dim);
+  color: var(--color-ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.address {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-soft);
+  touch-action: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dragging .handle {
+  cursor: grabbing;
+  color: var(--color-yolk-dark);
+}

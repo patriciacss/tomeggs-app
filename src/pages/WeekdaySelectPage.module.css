@@ -1,0 +1,37 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-5);
+}
+
+.dayCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+}
+
+.dayName {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.todayBadge {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--color-yolk);
+  color: #FFFFFF;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.dayCount {
+  margin-top: 2px;
+  font-size: 14px;
+}
