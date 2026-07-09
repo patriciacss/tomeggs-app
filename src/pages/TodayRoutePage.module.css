@@ -147,3 +147,9 @@
   font-size: 15px;
 }
 
+.familyBadge {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-4);
+}
+

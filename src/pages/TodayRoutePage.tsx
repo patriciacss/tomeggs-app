@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ClientRouteItem } from '../components/ClientRouteItem'
 import { SaleQuickModal } from '../components/SaleQuickModal'
-import { ChickIcon, CoinIcon, CoopIcon, EggBasketIcon } from '../components/FarmIcons'
+import { ChickIcon, CoinIcon, CoopIcon, EggBasketIcon, HenWithChicksIcon } from '../components/FarmIcons'
 import styles from './TodayRoutePage.module.css'
 import { useRouteForDay } from '../hooks/useRouteForDay'
 import { useDailySummary } from '../hooks/useDailySummary'
@@ -116,6 +116,10 @@ export function TodayRoutePage({ onOpenClient, onManageClients }: TodayRoutePage
             />
           ))
         )}
+
+        <div className={styles.familyBadge}>
+          <HenWithChicksIcon size={56} />
+        </div>
       </div>
 
       {saleClient && (

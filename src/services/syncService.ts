@@ -185,11 +185,15 @@ async function pushOutbox(): Promise<void> {
     try {
       if (item.entity === 'client') {
         if (item.action === 'delete') {
-          const { error } = await supabase
+          const { error, data } = await supabase
             .from('clients')
             .update({ deleted: true, updated_at: new Date().toISOString() })
             .eq('id', item.recordId)
+            .select('id')
           if (error) throw error
+          if (!data || data.length === 0) {
+            throw new Error(`Não foi possível excluir o cliente ${item.recordId} na nuvem.`)
+          }
         } else {
           const client = clientService.getById(item.recordId)
           if (!client) {
@@ -203,11 +207,15 @@ async function pushOutbox(): Promise<void> {
 
       if (item.entity === 'sale') {
         if (item.action === 'delete') {
-          const { error } = await supabase
+          const { error, data } = await supabase
             .from('sales')
             .update({ deleted: true, updated_at: new Date().toISOString() })
             .eq('id', item.recordId)
+            .select('id')
           if (error) throw error
+          if (!data || data.length === 0) {
+            throw new Error(`Não foi possível excluir a venda ${item.recordId} na nuvem.`)
+          }
         } else {
           const sale = saleService.getAll().find((entry) => entry.id === item.recordId)
           if (!sale) {
@@ -221,11 +229,15 @@ async function pushOutbox(): Promise<void> {
 
       if (item.entity === 'visit') {
         if (item.action === 'delete') {
-          const { error } = await supabase
+          const { error, data } = await supabase
             .from('visits')
             .update({ deleted: true, updated_at: new Date().toISOString() })
             .eq('id', item.recordId)
+            .select('id')
           if (error) throw error
+          if (!data || data.length === 0) {
+            throw new Error(`Não foi possível excluir a visita ${item.recordId} na nuvem.`)
+          }
         } else {
           const visit = visitService.getAll().find((entry) => entry.id === item.recordId)
           if (!visit) {

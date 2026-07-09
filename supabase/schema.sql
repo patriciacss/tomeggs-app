@@ -1,8 +1,10 @@
 -- Schema do banco de dados para o app TomÉgg
 -- Execute este SQL no SQL Editor do Supabase (plano gratuito)
 --
--- Cada linha pertence a um usuário (auth.users) via user_id, e o RLS garante
--- que cada usuário autenticado só enxerga e altera os próprios dados.
+-- O RLS aqui exige apenas estar logado (qualquer usuário com e-mail/senha
+-- válidos criado no painel do Supabase) — os dados são compartilhados entre
+-- todos os usuários autenticados, não isolados por dono. A coluna user_id
+-- fica só como registro de quem criou cada linha, sem afetar permissões.
 --
 -- Este script é seguro para rodar de novo (idempotente), inclusive em bancos
 -- que já tinham as tabelas criadas antes da coluna user_id existir.
@@ -83,35 +85,27 @@ drop policy if exists "Ler apenas as próprias visitas" on visits;
 drop policy if exists "Criar visitas para si mesmo" on visits;
 drop policy if exists "Atualizar apenas as próprias visitas" on visits;
 
-create policy "Ler apenas os próprios clientes" on clients
-  for select using (auth.uid() = user_id);
-create policy "Criar clientes para si mesmo" on clients
-  for insert with check (auth.uid() = user_id);
-create policy "Atualizar apenas os próprios clientes" on clients
-  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Ler clientes se estiver logado" on clients
+  for select using (auth.uid() is not null);
+create policy "Criar clientes se estiver logado" on clients
+  for insert with check (auth.uid() is not null);
+create policy "Atualizar clientes se estiver logado" on clients
+  for update using (auth.uid() is not null) with check (auth.uid() is not null);
 
-create policy "Ler apenas as próprias vendas" on sales
-  for select using (auth.uid() = user_id);
-create policy "Criar vendas para si mesmo" on sales
-  for insert with check (auth.uid() = user_id);
-create policy "Atualizar apenas as próprias vendas" on sales
-  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Ler vendas se estiver logado" on sales
+  for select using (auth.uid() is not null);
+create policy "Criar vendas se estiver logado" on sales
+  for insert with check (auth.uid() is not null);
+create policy "Atualizar vendas se estiver logado" on sales
+  for update using (auth.uid() is not null) with check (auth.uid() is not null);
 
-create policy "Ler apenas as próprias visitas" on visits
-  for select using (auth.uid() = user_id);
-create policy "Criar visitas para si mesmo" on visits
-  for insert with check (auth.uid() = user_id);
-create policy "Atualizar apenas as próprias visitas" on visits
-  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Ler visitas se estiver logado" on visits
+  for select using (auth.uid() is not null);
+create policy "Criar visitas se estiver logado" on visits
+  for insert with check (auth.uid() is not null);
+create policy "Atualizar visitas se estiver logado" on visits
+  for update using (auth.uid() is not null) with check (auth.uid() is not null);
 
 -- Este app não tem tela de cadastro: crie os usuários pelo painel do Supabase
--- (Authentication > Users > Add user) com e-mail e senha.
---
--- Se já existiam clientes/vendas/visitas cadastrados antes desta migração,
--- eles ficam com user_id nulo e somem para o RLS. Depois de criar seu
--- usuário, pegue o UUID dele em Authentication > Users e rode (trocando
--- o UUID abaixo):
---
--- update clients set user_id = '00000000-0000-0000-0000-000000000000' where user_id is null;
--- update sales   set user_id = '00000000-0000-0000-0000-000000000000' where user_id is null;
--- update visits  set user_id = '00000000-0000-0000-0000-000000000000' where user_id is null;
+-- (Authentication > Users > Add user) com e-mail e senha. Qualquer usuário
+-- criado lá passa a enxergar e editar os mesmos dados dos demais.

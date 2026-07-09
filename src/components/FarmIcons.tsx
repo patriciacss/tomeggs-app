@@ -192,3 +192,113 @@ export function ChickIcon({ size = 20 }: FarmIconProps) {
     </svg>
   )
 }
+
+interface ChickWalkProps {
+  x: number
+  y: number
+  scale: number
+}
+
+/** Um pintinho andando (voltado pra direita), posicionado por x/y/scale. */
+function ChickWalk({ x, y, scale }: ChickWalkProps) {
+  return (
+    <g transform={`translate(${x},${y}) scale(${scale})`}>
+      <path
+        d="M-8,6 C-4,1 5,3 6,12 C0,14 -6,12 -8,6 Z"
+        fill="#F3D19E"
+        stroke="#4A3325"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <ellipse cx="0" cy="10" rx="13" ry="11" fill="#FFFDF3" stroke="#4A3325" strokeWidth="3" />
+      <circle cx="11" cy="-1" r="8" fill="#FFFDF3" stroke="#4A3325" strokeWidth="3" />
+      <polygon points="18,-1 26,-3 26,2" fill="#F3A76A" stroke="#4A3325" strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="13" cy="-3" r="1.4" fill="#4A3325" />
+      <line x1="-3" y1="20" x2="-4" y2="26" stroke="#F3A76A" strokeWidth="3" strokeLinecap="round" />
+      <line x1="5" y1="20" x2="6" y2="26" stroke="#F3A76A" strokeWidth="3" strokeLinecap="round" />
+    </g>
+  )
+}
+
+/** Galinha mãe (de chapéu e botas) seguida por cinco pintinhos — cena de família da fazenda. */
+export function HenWithChicksIcon({ size = 44 }: FarmIconProps) {
+  const chickScale = 0.9
+  const groundY = 205
+  const chickTy = groundY - 26 * chickScale
+  const chickXs = [8, 48, 88, 128, 168]
+
+  return (
+    <svg viewBox="0 0 400 220" width={(size * 400) / 220} height={size} aria-hidden="true">
+      {chickXs.map((x) => (
+        <ChickWalk key={x} x={x} y={chickTy} scale={chickScale} />
+      ))}
+
+      <g transform="translate(178,10)">
+        {/* cauda */}
+        <path
+          d="M60,112 C35,95 18,65 14,32 C28,48 34,70 44,88"
+          fill="#FFFDF3"
+          stroke="#4A3325"
+          strokeWidth="5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M64,120 C42,108 22,88 12,56 C28,66 40,82 52,100"
+          fill="#F3D19E"
+          stroke="#4A3325"
+          strokeWidth="5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M70,128 C50,122 30,110 18,84 C34,90 48,100 58,114"
+          fill="#FFFDF3"
+          stroke="#4A3325"
+          strokeWidth="5"
+          strokeLinejoin="round"
+        />
+
+        {/* corpo */}
+        <ellipse cx="95" cy="128" rx="52" ry="42" fill="#FFFDF3" stroke="#4A3325" strokeWidth="5" />
+        <path
+          d="M72,110 C90,102 112,110 118,132 C104,128 86,130 74,140 C68,130 68,118 72,110 Z"
+          fill="#F3D19E"
+          stroke="#4A3325"
+          strokeWidth="4"
+          strokeLinejoin="round"
+        />
+
+        {/* botas */}
+        <rect x="72" y="180" width="20" height="22" rx="7" fill="#E2953B" stroke="#4A3325" strokeWidth="3.5" />
+        <line x1="71" y1="198" x2="93" y2="198" stroke="#4A3325" strokeWidth="3" strokeLinecap="round" />
+        <line x1="83" y1="168" x2="82" y2="181" stroke="#4A3325" strokeWidth="4" strokeLinecap="round" />
+
+        <rect x="104" y="180" width="20" height="22" rx="7" fill="#E2953B" stroke="#4A3325" strokeWidth="3.5" />
+        <line x1="103" y1="198" x2="125" y2="198" stroke="#4A3325" strokeWidth="3" strokeLinecap="round" />
+        <line x1="111" y1="168" x2="112" y2="181" stroke="#4A3325" strokeWidth="4" strokeLinecap="round" />
+
+        {/* cabeça */}
+        <circle cx="152" cy="80" r="27" fill="#FFFDF3" stroke="#4A3325" strokeWidth="5" />
+        <path
+          d="M168,96 C166,106 174,112 178,104 C182,112 176,120 168,116 C160,112 162,100 168,96 Z"
+          fill="#E4593A"
+          stroke="#4A3325"
+          strokeWidth="3.5"
+          strokeLinejoin="round"
+        />
+        <polygon points="177,76 198,70 198,86" fill="#F3A76A" stroke="#4A3325" strokeWidth="3.5" strokeLinejoin="round" />
+        <circle cx="160" cy="72" r="3.5" fill="#4A3325" />
+
+        {/* chapéu */}
+        <path
+          d="M126,58 Q126,32 152,32 Q178,32 178,58 Z"
+          fill="#F3D19E"
+          stroke="#4A3325"
+          strokeWidth="4"
+          strokeLinejoin="round"
+        />
+        <ellipse cx="152" cy="58" rx="38" ry="9" fill="#E2953B" stroke="#4A3325" strokeWidth="4" />
+        <path d="M128,50 Q152,58 176,50" fill="none" stroke="#4A3325" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
+      </g>
+    </svg>
+  )
+}
