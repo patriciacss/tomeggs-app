@@ -7,6 +7,7 @@
 .option {
   display: flex;
   align-items: center;
+  width: 100%;
   gap: var(--space-3);
   min-height: 56px;
   padding: 0 var(--space-4);
@@ -17,6 +18,8 @@
   font-weight: 700;
   font-size: 16px;
   text-decoration: none;
+  text-align: left;
+  cursor: pointer;
 }
 
 .option:active {

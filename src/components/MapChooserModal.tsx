@@ -11,27 +11,30 @@ export function MapChooserModal({ address, onClose }: MapChooserModalProps) {
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`
   const wazeUrl = `https://waze.com/ul?q=${query}&navigate=yes`
 
+  function open(url: string) {
+    // Navega na mesma janela (sem target="_blank") para o celular conseguir
+    // interceptar o link universal e abrir o app nativo (Waze/Maps) — em
+    // modo PWA "standalone" não existe aba nova pra abrir, então
+    // target="_blank" simplesmente não fazia nada.
+    window.location.href = url
+    onClose()
+  }
+
   return (
     <Modal title="Abrir endereço em" onClose={onClose}>
       <div className={styles.options}>
-        <a
-          className={styles.option}
-          href={googleMapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={onClose}
-        >
+        <button type="button" className={styles.option} onClick={() => open(googleMapsUrl)}>
           <span className={styles.icon} aria-hidden="true">
             🗺️
           </span>
           Google Maps
-        </a>
-        <a className={styles.option} href={wazeUrl} target="_blank" rel="noopener noreferrer" onClick={onClose}>
+        </button>
+        <button type="button" className={styles.option} onClick={() => open(wazeUrl)}>
           <span className={styles.icon} aria-hidden="true">
             🚗
           </span>
           Waze
-        </a>
+        </button>
       </div>
       <p className={styles.addressPreview}>{address}</p>
     </Modal>
