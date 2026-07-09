@@ -47,10 +47,6 @@ export function ClientFormPage({ clientId, onBack, onSaved }: ClientFormPageProp
       setError('Informe o nome do cliente.')
       return
     }
-    if (deliveryDays.length === 0) {
-      setError('Selecione ao menos um dia de entrega.')
-      return
-    }
 
     setError(null)
 
@@ -91,7 +87,7 @@ export function ClientFormPage({ clientId, onBack, onSaved }: ClientFormPageProp
             <TextField label="Observações" value={notes} onChange={setNotes} placeholder="Preferências, ponto de referência..." multiline />
 
             <ChipToggleGroup
-              label="Dias de entrega"
+              label="Dias de entrega (opcional)"
               options={WEEKDAYS.map((day) => ({ value: day.value, label: day.shortLabel }))}
               values={deliveryDays}
               onChange={setDeliveryDays}
