@@ -8,28 +8,41 @@ interface MapChooserModalProps {
 
 export function MapChooserModal({ address, onClose }: MapChooserModalProps) {
   const query = encodeURIComponent(address)
-  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`
-  const wazeUrl = `https://waze.com/ul?q=${query}&navigate=yes`
 
-  function open(url: string) {
-    // Navega na mesma janela (sem target="_blank") para o celular conseguir
-    // interceptar o link universal e abrir o app nativo (Waze/Maps) — em
-    // modo PWA "standalone" não existe aba nova pra abrir, então
-    // target="_blank" simplesmente não fazia nada.
-    window.location.href = url
+  // Tenta abrir o esquema nativo do app primeiro (o que de fato dispara o
+  // app instalado); se depois de um tempinho a página ainda estiver visível
+  // (ou seja, o app não abriu), cai pro link universal no navegador.
+  function openWithFallback(appUrl: string, webUrl: string) {
+    const start = Date.now()
+    window.location.href = appUrl
+
+    setTimeout(() => {
+      if (!document.hidden && Date.now() - start < 2000) {
+        window.location.href = webUrl
+      }
+    }, 800)
+  }
+
+  function openGoogleMaps() {
+    openWithFallback(`comgooglemaps://?q=${query}`, `https://www.google.com/maps/search/?api=1&query=${query}`)
+    onClose()
+  }
+
+  function openWaze() {
+    openWithFallback(`waze://?q=${query}&navigate=yes`, `https://waze.com/ul?q=${query}&navigate=yes`)
     onClose()
   }
 
   return (
     <Modal title="Abrir endereço em" onClose={onClose}>
       <div className={styles.options}>
-        <button type="button" className={styles.option} onClick={() => open(googleMapsUrl)}>
+        <button type="button" className={styles.option} onClick={openGoogleMaps}>
           <span className={styles.icon} aria-hidden="true">
             🗺️
           </span>
           Google Maps
         </button>
-        <button type="button" className={styles.option} onClick={() => open(wazeUrl)}>
+        <button type="button" className={styles.option} onClick={openWaze}>
           <span className={styles.icon} aria-hidden="true">
             🚗
           </span>
