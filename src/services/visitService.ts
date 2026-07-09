@@ -47,10 +47,24 @@ function markVisited(clientId: string, date: string): void {
   toggle(clientId, date)
 }
 
+function remove(id: string): void {
+  syncQueue.queue('visit', id, 'delete')
+  saveAll(getAll().filter((visit) => visit.id !== id))
+}
+
+/** Remove todas as visitas de um cliente (usado ao excluir o cliente). */
+function removeByClient(clientId: string): void {
+  for (const visit of getAll().filter((entry) => entry.clientId === clientId)) {
+    remove(visit.id)
+  }
+}
+
 export const visitService = {
   getAll,
   getByDate,
   isVisited,
   toggle,
   markVisited,
+  remove,
+  removeByClient,
 }

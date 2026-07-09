@@ -3,6 +3,8 @@ import type { Client, ClientInput, Weekday } from '../types'
 import { generateId } from '../utils/id'
 import { syncQueue } from './syncQueue'
 import { routeOrderService } from './routeOrderService'
+import { saleService } from './saleService'
+import { visitService } from './visitService'
 
 function getAll(): Client[] {
   return storageService.get<Client[]>(STORAGE_KEYS.clients, [])
@@ -66,6 +68,8 @@ function update(id: string, input: ClientInput): Client | undefined {
 }
 
 function remove(id: string): void {
+  saleService.removeByClient(id)
+  visitService.removeByClient(id)
   syncQueue.queue('client', id, 'delete')
   saveAll(getAll().filter((client) => client.id !== id))
 }

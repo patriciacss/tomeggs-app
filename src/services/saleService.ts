@@ -49,6 +49,13 @@ function remove(id: string): void {
   saveAll(getAll().filter((sale) => sale.id !== id))
 }
 
+/** Remove todas as vendas de um cliente (usado ao excluir o cliente). */
+function removeByClient(clientId: string): void {
+  for (const sale of getByClient(clientId)) {
+    remove(sale.id)
+  }
+}
+
 /** Marca uma venda como paga, informando a forma de pagamento usada. */
 function markPaid(id: string, paymentMethod: PaymentMethod): Sale | undefined {
   const sales = getAll()
@@ -91,6 +98,7 @@ export const saleService = {
   getByDate,
   add,
   remove,
+  removeByClient,
   markPaid,
   groupByDate,
   totalPending,
