@@ -171,15 +171,16 @@ function getUpdatedAt(entity: { updatedAt?: string; createdAt?: string; visitedA
   return entity.updatedAt ?? entity.createdAt ?? entity.visitedAt ?? ''
 }
 
-async function pushOutbox(): Promise<void> {
+async function pushOutbox(): Promise<string | null> {
   const supabase = getSupabaseClient()
-  if (!supabase) return
+  if (!supabase) return null
 
   const userId = authService.getUserId()
-  if (!userId) return
+  if (!userId) return null
 
   const outbox = syncQueue.getOutbox()
   const remaining = [...outbox]
+  let lastError: string | null = null
 
   for (const item of outbox) {
     try {
@@ -250,12 +251,14 @@ async function pushOutbox(): Promise<void> {
       }
 
       remaining.splice(remaining.indexOf(item), 1)
-    } catch {
-      // Mantém na fila para tentar novamente depois.
+    } catch (error) {
+      // Mantém na fila para tentar novamente depois, mas registra o motivo.
+      lastError = error instanceof Error ? error.message : 'Erro ao enviar alteração para a nuvem'
     }
   }
 
   syncQueue.saveOutbox(remaining)
+  return lastError
 }
 
 function mergeClients(remoteRows: DbClient[]): void {
@@ -366,8 +369,12 @@ async function syncNow(): Promise<boolean> {
   notify({ status: 'syncing', error: null })
 
   try {
-    await pushOutbox()
+    const pushError = await pushOutbox()
     await pullRemote()
+    if (pushError) {
+      notify({ status: 'error', error: pushError })
+      return false
+    }
     notify({ status: 'success', error: null })
     return true
   } catch (error) {
