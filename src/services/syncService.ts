@@ -404,18 +404,28 @@ function getState(): SyncState {
   return currentState
 }
 
+let initialized = false
+
 function initSync(): void {
   notify()
 
   if (!isSupabaseConfigured()) return
+  if (initialized) return
+  initialized = true
 
   window.addEventListener('online', () => {
     void syncNow()
   })
 
-  if (navigator.onLine) {
-    void syncNow()
-  }
+  // Só dispara a primeira sincronização quando a sessão de autenticação for
+  // confirmada (authService.subscribe já entrega o valor real assim que
+  // estiver pronto). Sincronizar antes disso faz authService.getUserId()
+  // retornar null e a sincronização falha silenciosamente.
+  authService.subscribe((session) => {
+    if (session && navigator.onLine) {
+      void syncNow()
+    }
+  })
 }
 
 export const syncService = {

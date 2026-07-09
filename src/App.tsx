@@ -8,7 +8,6 @@ import { ClientsListPage } from './pages/ClientsListPage'
 import { ClientFormPage } from './pages/ClientFormPage'
 import { BackupPage } from './pages/BackupPage'
 import { LoginPage } from './pages/LoginPage'
-import { seedDemoDataIfEmpty } from './services/seedData'
 import { syncService } from './services/syncService'
 import { authService } from './services/authService'
 import type { Tab, View } from './types/navigation'
@@ -49,7 +48,6 @@ export default function App() {
 
   useEffect(() => {
     if (authPhase !== 'authed') return
-    seedDemoDataIfEmpty()
     syncService.initSync()
   }, [authPhase])
 
