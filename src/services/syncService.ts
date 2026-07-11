@@ -5,7 +5,10 @@ import { clientService } from './clientService'
 import { saleService } from './saleService'
 import { visitService } from './visitService'
 import { authService } from './authService'
-import type { Client, PaymentMethod, ProductType, Sale, SaleUnit, Visit } from '../types'
+import { routeOrderService } from './routeOrderService'
+import type { RouteOrderEntry } from './routeOrderService'
+import { WEEKDAYS } from '../types'
+import type { Client, PaymentMethod, ProductType, Sale, SaleUnit, Visit, Weekday } from '../types'
 
 export type SyncStatus = 'idle' | 'syncing' | 'success' | 'error' | 'offline' | 'not_configured'
 
@@ -56,6 +59,12 @@ interface DbVisit {
   visited_at: string
   updated_at: string
   deleted: boolean
+}
+
+interface DbRouteOrder {
+  weekday: string
+  client_ids: string[]
+  updated_at: string
 }
 
 const listeners = new Set<SyncListener>()
@@ -250,6 +259,21 @@ async function pushOutbox(): Promise<string | null> {
         }
       }
 
+      if (item.entity === 'routeOrder') {
+        const weekday = item.recordId as Weekday
+        const entry = routeOrderService.getEntry(weekday)
+        if (!entry) {
+          remaining.splice(remaining.indexOf(item), 1)
+          continue
+        }
+        const { error } = await supabase.from('route_order').upsert({
+          weekday,
+          client_ids: entry.clientIds,
+          updated_at: entry.updatedAt,
+        } satisfies DbRouteOrder)
+        if (error) throw error
+      }
+
       remaining.splice(remaining.indexOf(item), 1)
     } catch (error) {
       // Mantém na fila para tentar novamente depois, mas registra o motivo.
@@ -324,6 +348,20 @@ function mergeVisits(remoteRows: DbVisit[]): void {
   storageService.set(STORAGE_KEYS.visits, Array.from(byId.values()))
 }
 
+function mergeRouteOrder(remoteRows: DbRouteOrder[]): void {
+  for (const row of remoteRows) {
+    const weekday = row.weekday as Weekday
+    if (!WEEKDAYS.some((option) => option.value === weekday)) continue
+
+    const remote: RouteOrderEntry = { clientIds: row.client_ids, updatedAt: row.updated_at }
+    const existing = routeOrderService.getEntry(weekday)
+
+    if (!existing || remote.updatedAt >= existing.updatedAt) {
+      routeOrderService.setOrderFromSync(weekday, remote)
+    }
+  }
+}
+
 async function pullRemote(): Promise<void> {
   const supabase = getSupabaseClient()
   if (!supabase) return
@@ -331,25 +369,28 @@ async function pullRemote(): Promise<void> {
   const lastSyncAt = storageService.get<string | null>(STORAGE_KEYS.lastSyncAt, null)
   const filter = lastSyncAt ? lastSyncAt : '1970-01-01T00:00:00.000Z'
 
-  const [clientsResult, salesResult, visitsResult] = await Promise.all([
+  const [clientsResult, salesResult, visitsResult, routeOrderResult] = await Promise.all([
     supabase.from('clients').select('*').gt('updated_at', filter),
     supabase.from('sales').select('*').gt('updated_at', filter),
     supabase.from('visits').select('*').gt('updated_at', filter),
+    supabase.from('route_order').select('*').gt('updated_at', filter),
   ])
 
   if (clientsResult.error) throw clientsResult.error
   if (salesResult.error) throw salesResult.error
   if (visitsResult.error) throw visitsResult.error
+  if (routeOrderResult.error) throw routeOrderResult.error
 
   mergeClients((clientsResult.data ?? []) as DbClient[])
   mergeSales((salesResult.data ?? []) as DbSale[])
   mergeVisits((visitsResult.data ?? []) as DbVisit[])
+  mergeRouteOrder((routeOrderResult.data ?? []) as DbRouteOrder[])
 
-  // Remove vendas/visitas órfãs (cliente já não existe mais), tanto local
-  // quanto na nuvem — cobre exclusões antigas que ficaram incompletas.
-  const validClientIds = new Set(clientService.getAll().map((client) => client.id))
-  saleService.removeOrphans(validClientIds)
-  visitService.removeOrphans(validClientIds)
+  // ATENÇÃO: a limpeza automática de vendas/visitas "órfãs" foi removida daqui.
+  // Ela comparava com a lista local de clientes, mas como a busca de clientes
+  // é incremental (só traz quem mudou recentemente), podia marcar como órfã
+  // uma venda cujo cliente existe de verdade mas ainda não tinha sido baixado
+  // nesse ciclo de sincronização — apagando vendas válidas por engano.
 
   storageService.set(STORAGE_KEYS.lastSyncAt, new Date().toISOString())
 }

@@ -1,7 +1,7 @@
 import { STORAGE_KEYS, storageService } from '../storage/storageService'
 import { isSupabaseConfigured } from '../lib/supabase'
 
-type SyncEntity = 'client' | 'sale' | 'visit'
+type SyncEntity = 'client' | 'sale' | 'visit' | 'routeOrder'
 
 export interface OutboxItem {
   id: string

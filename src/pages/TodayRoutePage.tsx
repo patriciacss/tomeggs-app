@@ -1,13 +1,23 @@
 import { useState } from 'react'
 import { ClientRouteItem } from '../components/ClientRouteItem'
+import { SaleChoiceModal } from '../components/SaleChoiceModal'
 import { SaleQuickModal } from '../components/SaleQuickModal'
+import { DailySalesModal } from '../components/DailySalesModal'
 import { ChickIcon, CoinIcon, CoopIcon, EggBasketIcon, HenWithChicksIcon } from '../components/FarmIcons'
 import styles from './TodayRoutePage.module.css'
 import { useRouteForDay } from '../hooks/useRouteForDay'
 import { useDailySummary } from '../hooks/useDailySummary'
+import { saleService } from '../services/saleService'
+import { visitService } from '../services/visitService'
 import { WEEKDAYS } from '../types'
+import type { Client, Sale } from '../types'
 import { formatBRL } from '../utils/currency'
 import { formatFullDatePT, todayISO, todayWeekday } from '../utils/date'
+
+type ModalState =
+  | { step: 'choice'; client: Client; existingSales: Sale[] }
+  | { step: 'form'; client: Client; sale: Sale | null }
+  | null
 
 interface TodayRoutePageProps {
   onOpenClient: (clientId: string) => void
@@ -19,8 +29,8 @@ export function TodayRoutePage({ onOpenClient, onManageClients }: TodayRoutePage
   const date = todayISO()
   const { routeClients, refresh } = useRouteForDay(weekday, date)
   const { summary, refresh: refreshSummary } = useDailySummary(date)
-  const [saleClientId, setSaleClientId] = useState<string | null>(null)
-  const saleClient = routeClients.find((item) => item.client.id === saleClientId)?.client
+  const [modal, setModal] = useState<ModalState>(null)
+  const [showDailySales, setShowDailySales] = useState(false)
 
   const dayLabel = WEEKDAYS.find((day) => day.value === weekday)?.label.replace('-feira', '') ?? ''
   const visitedCount = routeClients.filter((item) => item.visited).length
@@ -28,6 +38,18 @@ export function TodayRoutePage({ onOpenClient, onManageClients }: TodayRoutePage
   const progress = totalClients > 0 ? visitedCount / totalClients : 0
   const radius = 52
   const circumference = 2 * Math.PI * radius
+
+  function handleOpenClient(client: Client) {
+    const existingSales = saleService.getByDate(date).filter((sale) => sale.clientId === client.id)
+    setModal({ step: 'choice', client, existingSales })
+  }
+
+  function handleSkip(client: Client) {
+    visitService.markVisited(client.id, date)
+    refresh()
+    refreshSummary()
+    setModal(null)
+  }
 
   return (
     <div className={styles.page}>
@@ -71,13 +93,13 @@ export function TodayRoutePage({ onOpenClient, onManageClients }: TodayRoutePage
           </div>
 
           <div className={styles.statColumn}>
-            <div className={styles.stat}>
+            <button type="button" className={styles.stat} onClick={() => setShowDailySales(true)}>
               <div>
                 <p className={styles.statValue}>{formatBRL(summary.totalSold)}</p>
                 <p className={styles.statLabel}>Total vendido</p>
               </div>
               <EggBasketIcon size={22} />
-            </div>
+            </button>
             <div className={styles.stat}>
               <div>
                 <p className={styles.statValue}>{formatBRL(summary.totalReceived)}</p>
@@ -107,12 +129,13 @@ export function TodayRoutePage({ onOpenClient, onManageClients }: TodayRoutePage
             </button>
           </div>
         ) : (
-          routeClients.map(({ client, visited }) => (
+          routeClients.map(({ client, visited, noPurchase }) => (
             <ClientRouteItem
               key={client.id}
               client={client}
               visited={visited}
-              onOpen={() => setSaleClientId(client.id)}
+              noPurchase={noPurchase}
+              onOpen={() => handleOpenClient(client)}
             />
           ))
         )}
@@ -122,21 +145,35 @@ export function TodayRoutePage({ onOpenClient, onManageClients }: TodayRoutePage
         </div>
       </div>
 
-      {saleClient && (
+      {modal?.step === 'choice' && (
+        <SaleChoiceModal
+          client={modal.client}
+          existingSales={modal.existingSales}
+          onClose={() => setModal(null)}
+          onRegister={() => setModal({ step: 'form', client: modal.client, sale: null })}
+          onEdit={(sale) => setModal({ step: 'form', client: modal.client, sale })}
+          onSkip={() => handleSkip(modal.client)}
+        />
+      )}
+
+      {modal?.step === 'form' && (
         <SaleQuickModal
-          client={saleClient}
-          onClose={() => setSaleClientId(null)}
+          client={modal.client}
+          sale={modal.sale ?? undefined}
+          onClose={() => setModal(null)}
           onSaved={() => {
             refresh()
             refreshSummary()
-            setSaleClientId(null)
+            setModal(null)
           }}
           onOpenProfile={(clientId) => {
-            setSaleClientId(null)
+            setModal(null)
             onOpenClient(clientId)
           }}
         />
       )}
+
+      {showDailySales && <DailySalesModal date={date} onClose={() => setShowDailySales(false)} />}
     </div>
   )
 }

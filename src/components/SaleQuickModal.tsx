@@ -6,7 +6,7 @@ import { SelectField } from './ui/SelectField'
 import { SegmentedControl } from './ui/SegmentedControl'
 import { Button } from './ui/Button'
 import styles from './SaleQuickModal.module.css'
-import type { Client, PaymentMethod, ProductType, SaleUnit } from '../types'
+import type { Client, PaymentMethod, ProductType, Sale, SaleUnit } from '../types'
 import { PRODUCT_TYPES, SALE_UNITS } from '../types'
 import { saleService } from '../services/saleService'
 import { visitService } from '../services/visitService'
@@ -29,6 +29,8 @@ interface SaleQuickModalProps {
   onOpenProfile?: (clientId: string) => void
   /** Marca o cliente como entregue na rota de hoje ao salvar (padrão: true). */
   markVisitedOnSave?: boolean
+  /** Quando informado, a modal edita essa venda em vez de criar uma nova. */
+  sale?: Sale
 }
 
 export function SaleQuickModal({
@@ -37,12 +39,16 @@ export function SaleQuickModal({
   onSaved,
   onOpenProfile,
   markVisitedOnSave = true,
+  sale,
 }: SaleQuickModalProps) {
-  const [productType, setProductType] = useState<ProductType>('jumbo-branco')
-  const [unit, setUnit] = useState<SaleUnit>('cartela')
-  const [dozensText, setDozensText] = useState('')
-  const [amountDigits, setAmountDigits] = useState('')
-  const [paymentChip, setPaymentChip] = useState<PaymentChip>('dinheiro')
+  const isEditing = Boolean(sale)
+  const [productType, setProductType] = useState<ProductType>(sale?.productType ?? 'jumbo-branco')
+  const [unit, setUnit] = useState<SaleUnit>(sale?.unit ?? 'cartela')
+  const [dozensText, setDozensText] = useState(sale ? String(sale.dozens).replace('.', ',') : '')
+  const [amountDigits, setAmountDigits] = useState(sale ? String(Math.round(sale.amount * 100)) : '')
+  const [paymentChip, setPaymentChip] = useState<PaymentChip>(
+    sale ? (sale.paid ? (sale.paymentMethod ?? 'dinheiro') : 'fiado') : 'dinheiro',
+  )
   const [error, setError] = useState<string | null>(null)
 
   function readAmounts(): { dozens: number; amount: number } | null {
@@ -69,24 +75,36 @@ export function SaleQuickModal({
     const paid = paymentChip !== 'fiado'
     const paymentMethod: PaymentMethod | undefined = paid ? (paymentChip as PaymentMethod) : undefined
 
-    saleService.add({
-      clientId: client.id,
-      date: todayISO(),
-      productType,
-      dozens: values.dozens,
-      unit,
-      amount: values.amount,
-      paid,
-      paymentMethod,
-    })
-    if (markVisitedOnSave) {
-      visitService.markVisited(client.id, todayISO())
+    if (sale) {
+      saleService.update(sale.id, {
+        date: sale.date,
+        productType,
+        dozens: values.dozens,
+        unit,
+        amount: values.amount,
+        paid,
+        paymentMethod,
+      })
+    } else {
+      saleService.add({
+        clientId: client.id,
+        date: todayISO(),
+        productType,
+        dozens: values.dozens,
+        unit,
+        amount: values.amount,
+        paid,
+        paymentMethod,
+      })
+      if (markVisitedOnSave) {
+        visitService.markVisited(client.id, todayISO())
+      }
     }
     onSaved()
   }
 
   return (
-    <Modal title={client.name} onClose={onClose}>
+    <Modal title={isEditing ? `Editar venda — ${client.name}` : client.name} onClose={onClose}>
       <form className={styles.form} onSubmit={handleSubmit}>
         <SelectField
           label="Tipo"
@@ -140,7 +158,7 @@ export function SaleQuickModal({
 
         <div className={styles.actions}>
           <Button type="submit" fullWidth className={styles.deliverButton}>
-            {markVisitedOnSave ? 'Marcar entregue' : 'Salvar venda'}
+            {isEditing ? 'Salvar alterações' : markVisitedOnSave ? 'Marcar entregue' : 'Salvar venda'}
           </Button>
         </div>
 

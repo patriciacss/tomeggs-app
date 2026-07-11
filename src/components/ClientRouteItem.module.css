@@ -57,6 +57,18 @@
   color: var(--color-moss);
 }
 
+.checkCircle.declined {
+  border-color: var(--color-clay);
+  color: var(--color-clay);
+}
+
+.noPurchaseLabel {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-clay);
+}
+
 .arrowCircle {
   display: flex;
   align-items: center;

@@ -142,11 +142,41 @@
   color: var(--color-ink-soft);
 }
 
+.saleTopActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.saleEditButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-surface-dim);
+  color: var(--color-ink-soft);
+  cursor: pointer;
+}
+
 .pillPaid {
   padding: 4px 10px;
   border-radius: 999px;
   background: rgba(91, 122, 82, 0.15);
   color: var(--color-moss);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pillDeclined {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(193, 85, 44, 0.12);
+  color: var(--color-clay);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;

@@ -1,5 +1,5 @@
 import { STORAGE_KEYS, storageService } from '../storage/storageService'
-import type { PaymentMethod, ProductType, Sale, SaleInput } from '../types'
+import type { PaymentMethod, ProductType, Sale, SaleInput, SaleUnit } from '../types'
 import { generateId } from '../utils/id'
 import { syncQueue } from './syncQueue'
 
@@ -65,6 +65,34 @@ function removeOrphans(validClientIds: Set<string>): void {
   }
 }
 
+export type SaleEditInput = {
+  date: string
+  productType: ProductType
+  dozens: number
+  unit: SaleUnit
+  amount: number
+  paid: boolean
+  paymentMethod?: PaymentMethod
+}
+
+/** Atualiza os dados de uma venda já registrada (editar pedido). */
+function update(id: string, input: SaleEditInput): Sale | undefined {
+  const sales = getAll()
+  const index = sales.findIndex((sale) => sale.id === id)
+  if (index === -1) return undefined
+
+  const updated: Sale = {
+    ...sales[index],
+    ...input,
+    paymentMethod: input.paid ? input.paymentMethod : undefined,
+    updatedAt: new Date().toISOString(),
+  }
+  sales[index] = updated
+  saveAll(sales)
+  syncQueue.queue('sale', id)
+  return updated
+}
+
 /** Marca uma venda como paga, informando a forma de pagamento usada. */
 function markPaid(id: string, paymentMethod: PaymentMethod): Sale | undefined {
   const sales = getAll()
@@ -106,6 +134,7 @@ export const saleService = {
   getByClient,
   getByDate,
   add,
+  update,
   remove,
   removeByClient,
   removeOrphans,

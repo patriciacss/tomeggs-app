@@ -15,6 +15,12 @@ function getByDate(date: string): Visit[] {
   return getAll().filter((visit) => visit.date === date)
 }
 
+function getByClient(clientId: string): Visit[] {
+  return getAll()
+    .filter((visit) => visit.clientId === clientId)
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+}
+
 function isVisited(clientId: string, date: string): boolean {
   return getAll().some((visit) => visit.clientId === clientId && visit.date === date)
 }
@@ -71,6 +77,7 @@ function removeOrphans(validClientIds: Set<string>): void {
 export const visitService = {
   getAll,
   getByDate,
+  getByClient,
   isVisited,
   toggle,
   markVisited,

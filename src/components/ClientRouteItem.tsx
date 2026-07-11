@@ -7,10 +7,11 @@ import type { Client } from '../types'
 interface ClientRouteItemProps {
   client: Client
   visited: boolean
+  noPurchase?: boolean
   onOpen: () => void
 }
 
-export function ClientRouteItem({ client, visited, onOpen }: ClientRouteItemProps) {
+export function ClientRouteItem({ client, visited, noPurchase = false, onOpen }: ClientRouteItemProps) {
   const [showMap, setShowMap] = useState(false)
 
   return (
@@ -27,20 +28,30 @@ export function ClientRouteItem({ client, visited, onOpen }: ClientRouteItemProp
           }
         }}
       >
-        <span className={`${styles.checkCircle} ${visited ? styles.checked : ''}`} aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-            <path
-              d="M5 12.5L10 17.5L19 7"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+        <span
+          className={`${styles.checkCircle} ${visited ? styles.checked : ''} ${noPurchase ? styles.declined : ''}`}
+          aria-hidden="true"
+        >
+          {noPurchase ? (
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+              <path d="M6 12h12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+              <path
+                d="M5 12.5L10 17.5L19 7"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
         </span>
 
         <div className={styles.info}>
-          <p className={`${styles.name} ${visited ? styles.nameDone : ''}`}>{client.name}</p>
+          <p className={`${styles.name} ${visited && !noPurchase ? styles.nameDone : ''}`}>{client.name}</p>
+          {noPurchase && <p className={styles.noPurchaseLabel}>Não quis comprar hoje</p>}
           {client.address && (
             <p
               className={styles.address}

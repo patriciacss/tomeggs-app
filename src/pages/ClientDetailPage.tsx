@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ScreenHeader } from '../components/ui/ScreenHeader'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -9,7 +9,9 @@ import styles from './ClientDetailPage.module.css'
 import { useClient } from '../hooks/useClient'
 import { useSales } from '../hooks/useSales'
 import { clientService } from '../services/clientService'
+import { visitService } from '../services/visitService'
 import { WEEKDAYS, getSaleUnitLabel } from '../types'
+import type { Sale, Visit } from '../types'
 import { formatBRL } from '../utils/currency'
 import { formatDateBR } from '../utils/date'
 
@@ -28,8 +30,14 @@ interface ClientDetailPageProps {
 export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageProps) {
   const { client } = useClient(clientId)
   const { sales, markSalePaid, refresh: refreshSales } = useSales(clientId)
+  const [visits, setVisits] = useState<Visit[]>([])
   const [showSaleModal, setShowSaleModal] = useState(false)
   const [showMap, setShowMap] = useState(false)
+  const [editingSale, setEditingSale] = useState<Sale | null>(null)
+
+  useEffect(() => {
+    setVisits(visitService.getByClient(clientId))
+  }, [clientId])
 
   if (!client) {
     return (
@@ -46,6 +54,17 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
 
   const totalFaturado = sales.filter((sale) => sale.paid).reduce((sum, sale) => sum + sale.amount, 0)
   const totalDevendo = sales.filter((sale) => !sale.paid).reduce((sum, sale) => sum + sale.amount, 0)
+
+  // Visitas em que o cliente foi visitado mas não comprou (sem venda naquela data).
+  const declinedDates = visits
+    .filter((visit) => !sales.some((sale) => sale.date === visit.date))
+    .map((visit) => visit.date)
+
+  type TimelineEntry = { type: 'sale'; date: string; sale: Sale } | { type: 'declined'; date: string }
+  const timeline: TimelineEntry[] = [
+    ...sales.map((sale): TimelineEntry => ({ type: 'sale', date: sale.date, sale })),
+    ...declinedDates.map((date): TimelineEntry => ({ type: 'declined', date })),
+  ].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
 
   function handleDelete() {
     const confirmed = window.confirm('Remover este cliente e todo o seu histórico? Esta ação não pode ser desfeita.')
@@ -138,36 +157,64 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
 
         <h2 className={styles.sectionTitle}>Histórico</h2>
 
-        {sales.length === 0 && (
+        {timeline.length === 0 && (
           <Card>
-            <p className={styles.empty}>Nenhuma venda registrada ainda para este cliente.</p>
+            <p className={styles.empty}>Nenhuma venda ou visita registrada ainda para este cliente.</p>
           </Card>
         )}
 
-        {sales.map((sale) => (
-          <Card key={sale.id} className={styles.saleCard}>
-            <div className={styles.saleTop}>
-              <span className={styles.saleDate}>{formatDateBR(sale.date)}</span>
-              {sale.paid ? (
-                <span className={styles.pillPaid}>Pago</span>
-              ) : (
-                <button
-                  type="button"
-                  className={styles.pillPending}
-                  onClick={() => markSalePaid(sale.id, 'dinheiro')}
-                >
-                  Devendo · Marcar pago
-                </button>
+        {timeline.map((entry) =>
+          entry.type === 'declined' ? (
+            <Card key={`declined-${entry.date}`} className={styles.saleCard}>
+              <div className={styles.saleTop}>
+                <span className={styles.saleDate}>{formatDateBR(entry.date)}</span>
+                <span className={styles.pillDeclined}>Não comprou</span>
+              </div>
+            </Card>
+          ) : (
+            <Card key={entry.sale.id} className={styles.saleCard}>
+              <div className={styles.saleTop}>
+                <span className={styles.saleDate}>{formatDateBR(entry.sale.date)}</span>
+                <div className={styles.saleTopActions}>
+                  {entry.sale.paid ? (
+                    <span className={styles.pillPaid}>Pago</span>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.pillPending}
+                      onClick={() => markSalePaid(entry.sale.id, 'dinheiro')}
+                    >
+                      Devendo · Marcar pago
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={styles.saleEditButton}
+                    onClick={() => setEditingSale(entry.sale)}
+                    aria-label="Editar venda"
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                      <path
+                        d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <p className={styles.saleAmount}>
+                {entry.sale.dozens} {getSaleUnitLabel(entry.sale.unit, entry.sale.dozens)} ·{' '}
+                {formatBRL(entry.sale.amount)}
+              </p>
+              {entry.sale.paid && entry.sale.paymentMethod && (
+                <p className={styles.salePayment}>{PAYMENT_LABELS[entry.sale.paymentMethod]}</p>
               )}
-            </div>
-            <p className={styles.saleAmount}>
-              {sale.dozens} {getSaleUnitLabel(sale.unit, sale.dozens)} · {formatBRL(sale.amount)}
-            </p>
-            {sale.paid && sale.paymentMethod && (
-              <p className={styles.salePayment}>{PAYMENT_LABELS[sale.paymentMethod]}</p>
-            )}
-          </Card>
-        ))}
+            </Card>
+          ),
+        )}
 
         <button type="button" className={styles.deleteButton} onClick={handleDelete}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
@@ -191,6 +238,18 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
           onSaved={() => {
             refreshSales()
             setShowSaleModal(false)
+          }}
+        />
+      )}
+
+      {editingSale && (
+        <SaleQuickModal
+          client={client}
+          sale={editingSale}
+          onClose={() => setEditingSale(null)}
+          onSaved={() => {
+            refreshSales()
+            setEditingSale(null)
           }}
         />
       )}
