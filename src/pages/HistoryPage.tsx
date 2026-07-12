@@ -88,13 +88,19 @@ export function HistoryPage({ onBack }: HistoryPageProps) {
 
         <Card>
           <h2 className={styles.cardTitle}>Consultar por data</h2>
-          <input
-            type="date"
-            className={styles.dateInput}
-            value={selectedDate}
-            max={todayISO()}
-            onChange={(event) => setSelectedDate(event.target.value)}
-          />
+          <div className={styles.dateField}>
+            <label htmlFor="history-date" className={styles.dateLabel}>
+              Data
+            </label>
+            <input
+              id="history-date"
+              type="date"
+              className={styles.dateInput}
+              value={selectedDate}
+              max={todayISO()}
+              onChange={(event) => setSelectedDate(event.target.value)}
+            />
+          </div>
 
           {salesForDate.length > 0 && (
             <div className={styles.statGrid}>

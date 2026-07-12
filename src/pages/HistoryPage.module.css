@@ -50,16 +50,35 @@
   text-align: center;
 }
 
+.dateField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.dateLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
 .dateInput {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-line);
-  background: var(--color-bg);
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-line);
+  background: var(--color-surface);
   color: var(--color-ink);
   font-size: 15px;
   font-family: inherit;
-  margin-bottom: var(--space-3);
+  color-scheme: light;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--color-yolk-dark);
 }
 
 .list {
