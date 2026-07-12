@@ -7,12 +7,20 @@ import { ClientDetailPage } from './pages/ClientDetailPage'
 import { ClientsListPage } from './pages/ClientsListPage'
 import { ClientFormPage } from './pages/ClientFormPage'
 import { BackupPage } from './pages/BackupPage'
+import { HistoryPage } from './pages/HistoryPage'
 import { LoginPage } from './pages/LoginPage'
+import { NewSaleChoiceModal } from './components/NewSaleChoiceModal'
+import { ClientPickerModal } from './components/ClientPickerModal'
+import { SaleQuickModal } from './components/SaleQuickModal'
+import { WalkupSaleModal } from './components/WalkupSaleModal'
 import { syncService } from './services/syncService'
 import { authService } from './services/authService'
+import type { Client } from './types'
 import type { Tab, View } from './types/navigation'
 
 type AuthPhase = 'checking' | 'authed' | 'guest'
+
+type SaleFlow = 'choice' | 'pickClient' | { step: 'clientSale'; client: Client } | 'walkup' | null
 
 // Sessão salva localmente já responde de forma otimista (offline-first);
 // só ficamos em "checking" quando é preciso perguntar ao Supabase se há
@@ -56,6 +64,16 @@ export default function App() {
   const [stack, setStack] = useState<View[]>([{ name: 'todayRoute' }])
   const view = stack[stack.length - 1]
 
+  // Fluxo do botão "+" (registrar venda), independente da navegação principal.
+  const [saleFlow, setSaleFlow] = useState<SaleFlow>(null)
+  // Incrementado ao salvar uma venda pelo "+", força a tela atual a recarregar seus dados.
+  const [dataVersion, setDataVersion] = useState(0)
+
+  function handleSaleSaved() {
+    setSaleFlow(null)
+    setDataVersion((version) => version + 1)
+  }
+
   function handleSelectTab(tab: Tab) {
     setActiveTab(tab)
     setStack([rootViewForTab(tab)])
@@ -84,6 +102,7 @@ export default function App() {
               setActiveTab('clientes')
               setStack([{ name: 'clientsList' }])
             }}
+            onOpenHistory={() => push({ name: 'history' })}
           />
         )
 
@@ -134,6 +153,9 @@ export default function App() {
 
       case 'backup':
         return <BackupPage />
+
+      case 'history':
+        return <HistoryPage onBack={goBack} />
     }
   }
 
@@ -160,8 +182,39 @@ export default function App() {
 
   return (
     <>
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{renderView()}</main>
-      <BottomNav activeTab={activeTab} onSelect={handleSelectTab} />
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div key={dataVersion} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+          {renderView()}
+        </div>
+      </main>
+      <BottomNav activeTab={activeTab} onSelect={handleSelectTab} onAddSale={() => setSaleFlow('choice')} />
+
+      {saleFlow === 'choice' && (
+        <NewSaleChoiceModal
+          onClose={() => setSaleFlow(null)}
+          onPickClient={() => setSaleFlow('pickClient')}
+          onWalkup={() => setSaleFlow('walkup')}
+        />
+      )}
+
+      {saleFlow === 'pickClient' && (
+        <ClientPickerModal
+          onClose={() => setSaleFlow(null)}
+          onSelect={(client) => setSaleFlow({ step: 'clientSale', client })}
+        />
+      )}
+
+      {typeof saleFlow === 'object' && saleFlow?.step === 'clientSale' && (
+        <SaleQuickModal
+          client={saleFlow.client}
+          onClose={() => setSaleFlow(null)}
+          onSaved={handleSaleSaved}
+        />
+      )}
+
+      {saleFlow === 'walkup' && (
+        <WalkupSaleModal onClose={() => setSaleFlow(null)} onSaved={handleSaleSaved} />
+      )}
     </>
   )
 }

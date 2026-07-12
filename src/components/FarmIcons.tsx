@@ -193,6 +193,23 @@ export function ChickIcon({ size = 20 }: FarmIconProps) {
   )
 }
 
+/** Histórico — relógio com seta de voltar, usado para abrir o dashboard de histórico. */
+export function HistoryIcon({ size = 20 }: FarmIconProps) {
+  return (
+    <svg viewBox="0 0 48 48" width={size} height={size} aria-hidden="true">
+      <path
+        d="M24,8 A16,16 0 1 1 9.5,17"
+        fill="none"
+        stroke="#4A3325"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+      <polygon points="9.5,9 9.5,17 17.5,17" fill="#4A3325" />
+      <path d="M24,16 L24,25 L31,29" fill="none" stroke="#4A3325" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 interface ChickWalkProps {
   x: number
   y: number

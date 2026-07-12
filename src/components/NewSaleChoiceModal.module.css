@@ -1,0 +1,15 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.registerButton {
+  background: var(--color-moss);
+  color: white;
+  box-shadow: 0 3px 0 #445d3d;
+}
+
+.registerButton:active {
+  box-shadow: 0 1px 0 #445d3d;
+}

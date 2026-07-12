@@ -23,7 +23,8 @@ create table if not exists clients (
 
 create table if not exists sales (
   id text primary key,
-  client_id text not null,
+  client_id text,
+  customer_name text,
   date text not null,
   product_type text not null default 'branco',
   dozens numeric not null,
@@ -59,6 +60,9 @@ alter table clients add column if not exists user_id uuid references auth.users 
 alter table sales add column if not exists user_id uuid references auth.users (id) on delete cascade;
 alter table visits add column if not exists user_id uuid references auth.users (id) on delete cascade;
 alter table sales add column if not exists unit text not null default 'cartela';
+alter table sales add column if not exists customer_name text;
+-- Permite venda avulsa (sem cliente cadastrado), usada pelo botão "+".
+alter table sales alter column client_id drop not null;
 
 create index if not exists clients_updated_at_idx on clients (updated_at);
 create index if not exists sales_updated_at_idx on sales (updated_at);

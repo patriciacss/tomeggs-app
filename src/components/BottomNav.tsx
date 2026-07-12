@@ -69,12 +69,34 @@ const ITEMS: NavItem[] = [
 interface BottomNavProps {
   activeTab: Tab
   onSelect: (tab: Tab) => void
+  onAddSale: () => void
 }
 
-export function BottomNav({ activeTab, onSelect }: BottomNavProps) {
+export function BottomNav({ activeTab, onSelect, onAddSale }: BottomNavProps) {
+  const [first, second, ...rest] = ITEMS
   return (
     <nav className={styles.nav} aria-label="Navegação principal">
-      {ITEMS.map((item) => (
+      {[first, second].map((item) => (
+        <button
+          key={item.tab}
+          type="button"
+          className={`${styles.item} ${activeTab === item.tab ? styles.active : ''}`}
+          onClick={() => onSelect(item.tab)}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+        </button>
+      ))}
+
+      <div className={styles.fabSlot}>
+        <button type="button" className={styles.fab} onClick={onAddSale} aria-label="Registrar venda">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
+
+      {rest.map((item) => (
         <button
           key={item.tab}
           type="button"

@@ -3,7 +3,7 @@ import { ClientRouteItem } from '../components/ClientRouteItem'
 import { SaleChoiceModal } from '../components/SaleChoiceModal'
 import { SaleQuickModal } from '../components/SaleQuickModal'
 import { DailySalesModal } from '../components/DailySalesModal'
-import { ChickIcon, CoinIcon, CoopIcon, EggBasketIcon, HenWithChicksIcon } from '../components/FarmIcons'
+import { ChickIcon, CoinIcon, CoopIcon, EggBasketIcon, HenWithChicksIcon, HistoryIcon } from '../components/FarmIcons'
 import styles from './TodayRoutePage.module.css'
 import { useRouteForDay } from '../hooks/useRouteForDay'
 import { useDailySummary } from '../hooks/useDailySummary'
@@ -22,9 +22,10 @@ type ModalState =
 interface TodayRoutePageProps {
   onOpenClient: (clientId: string) => void
   onManageClients: () => void
+  onOpenHistory: () => void
 }
 
-export function TodayRoutePage({ onOpenClient, onManageClients }: TodayRoutePageProps) {
+export function TodayRoutePage({ onOpenClient, onManageClients, onOpenHistory }: TodayRoutePageProps) {
   const weekday = todayWeekday()
   const date = todayISO()
   const { routeClients, refresh } = useRouteForDay(weekday, date)
@@ -58,6 +59,14 @@ export function TodayRoutePage({ onOpenClient, onManageClients }: TodayRoutePage
           <div className={styles.appIcon}>
             <ChickIcon size={56} />
           </div>
+          <button
+            type="button"
+            className={styles.historyButton}
+            onClick={onOpenHistory}
+            aria-label="Ver histórico"
+          >
+            <HistoryIcon size={22} />
+          </button>
         </div>
 
         <p className={styles.eyebrow}>Rota de hoje</p>

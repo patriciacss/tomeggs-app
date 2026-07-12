@@ -56,10 +56,10 @@ function removeByClient(clientId: string): void {
   }
 }
 
-/** Remove vendas cujo cliente não existe mais (limpeza de dados órfãos). */
+/** Remove vendas cujo cliente não existe mais (limpeza de dados órfãos). Vendas avulsas (sem clientId) nunca são órfãs. */
 function removeOrphans(validClientIds: Set<string>): void {
   for (const sale of getAll()) {
-    if (!validClientIds.has(sale.clientId)) {
+    if (sale.clientId && !validClientIds.has(sale.clientId)) {
       remove(sale.id)
     }
   }

@@ -38,7 +38,8 @@ interface DbClient {
 interface DbSale {
   id: string
   user_id: string
-  client_id: string
+  client_id: string | null
+  customer_name: string | null
   date: string
   product_type: ProductType
   dozens: number
@@ -122,7 +123,8 @@ function toDbSale(sale: Sale, userId: string): DbSale {
   return {
     id: sale.id,
     user_id: userId,
-    client_id: sale.clientId,
+    client_id: sale.clientId ?? null,
+    customer_name: sale.customerName ?? null,
     date: sale.date,
     product_type: sale.productType ?? 'branco',
     dozens: sale.dozens,
@@ -139,7 +141,8 @@ function toDbSale(sale: Sale, userId: string): DbSale {
 function fromDbSale(row: DbSale): Sale {
   return {
     id: row.id,
-    clientId: row.client_id,
+    clientId: row.client_id ?? undefined,
+    customerName: row.customer_name ?? undefined,
     date: row.date,
     productType: row.product_type,
     dozens: row.dozens,

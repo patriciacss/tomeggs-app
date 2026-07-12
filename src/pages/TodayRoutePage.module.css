@@ -9,12 +9,28 @@
 
 .titleRow {
   margin-bottom: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
 }
 
 .appIcon {
   flex-shrink: 0;
   display: block;
   margin-bottom: 0;
+}
+
+.historyButton {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  cursor: pointer;
 }
 
 .eyebrow {

@@ -10,3 +10,4 @@ export type View =
   | { name: 'clientsList' }
   | { name: 'clientForm'; clientId?: string }
   | { name: 'backup' }
+  | { name: 'history' }

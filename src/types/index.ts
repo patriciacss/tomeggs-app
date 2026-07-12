@@ -96,7 +96,10 @@ export type ClientInput = Omit<Client, 'id' | 'createdAt'>
 // Quando não paga, é considerada "fiado" (pendente) e paymentMethod fica undefined.
 export interface Sale {
   id: string
-  clientId: string
+  // Ausente quando é uma venda avulsa (sem cliente cadastrado) — nesse caso
+  // customerName guarda o nome informado na hora, se houver.
+  clientId?: string
+  customerName?: string
   date: string // formato YYYY-MM-DD
   productType: ProductType
   dozens: number
@@ -110,7 +113,8 @@ export interface Sale {
 }
 
 export type SaleInput = {
-  clientId: string
+  clientId?: string
+  customerName?: string
   date: string
   productType: ProductType
   dozens: number
