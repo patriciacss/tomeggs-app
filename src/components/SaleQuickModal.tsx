@@ -103,6 +103,14 @@ export function SaleQuickModal({
     onSaved()
   }
 
+  function handleDelete() {
+    if (!sale) return
+    const confirmed = window.confirm('Excluir esta venda? Esta ação não pode ser desfeita.')
+    if (!confirmed) return
+    saleService.remove(sale.id)
+    onSaved()
+  }
+
   return (
     <Modal title={isEditing ? `Editar venda — ${client.name}` : client.name} onClose={onClose}>
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -160,6 +168,11 @@ export function SaleQuickModal({
           <Button type="submit" fullWidth className={styles.deliverButton}>
             {isEditing ? 'Salvar alterações' : markVisitedOnSave ? 'Marcar entregue' : 'Salvar venda'}
           </Button>
+          {isEditing && (
+            <Button type="button" variant="danger" fullWidth onClick={handleDelete}>
+              Excluir venda
+            </Button>
+          )}
         </div>
 
         {onOpenProfile && (
