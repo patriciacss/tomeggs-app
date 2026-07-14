@@ -133,6 +133,48 @@ button.stat {
   color: var(--color-ink-soft);
 }
 
+.searchSection {
+  padding-top: var(--space-2);
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) var(--space-4) var(--space-4);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-yolk);
+  border-radius: 999px;
+  box-shadow: var(--shadow-card);
+}
+
+.searchDivider {
+  height: 1px;
+  margin: var(--space-3) var(--space-4) var(--space-5);
+  background: var(--color-line);
+  opacity: 0.35;
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  color: var(--color-yolk);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: var(--color-ink);
+  padding: var(--space-2) 0;
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
 .content {
   padding: var(--space-3) var(--space-4) var(--space-6);
   display: flex;

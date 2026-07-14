@@ -32,11 +32,17 @@ export function TodayRoutePage({ onOpenClient, onManageClients, onOpenHistory }:
   const { summary, refresh: refreshSummary } = useDailySummary(date)
   const [modal, setModal] = useState<ModalState>(null)
   const [showDailySales, setShowDailySales] = useState(false)
+  const [query, setQuery] = useState('')
 
   const dayLabel = WEEKDAYS.find((day) => day.value === weekday)?.label.replace('-feira', '') ?? ''
   const visitedCount = routeClients.filter((item) => item.visited).length
   const totalClients = routeClients.length
   const progress = totalClients > 0 ? visitedCount / totalClients : 0
+
+  const normalizedQuery = query.trim().toLowerCase()
+  const filteredRouteClients = normalizedQuery
+    ? routeClients.filter(({ client }) => client.name.toLowerCase().includes(normalizedQuery))
+    : routeClients
   const radius = 52
   const circumference = 2 * Math.PI * radius
 
@@ -127,6 +133,25 @@ export function TodayRoutePage({ onOpenClient, onManageClients, onOpenHistory }:
         </div>
       </div>
 
+      {routeClients.length > 0 && (
+        <div className={styles.searchSection}>
+          <div className={styles.searchBar}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" className={styles.searchIcon}>
+              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+              <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <input
+              className={styles.searchInput}
+              type="text"
+              placeholder="Buscar cliente na rota"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </div>
+          <div className={styles.searchDivider} />
+        </div>
+      )}
+
       <div className={styles.content}>
         {routeClients.length === 0 ? (
           <div className={styles.emptyCard}>
@@ -137,8 +162,10 @@ export function TodayRoutePage({ onOpenClient, onManageClients, onOpenHistory }:
               Gerenciar clientes →
             </button>
           </div>
+        ) : filteredRouteClients.length === 0 ? (
+          <p className={styles.emptyText}>Nenhum cliente encontrado.</p>
         ) : (
-          routeClients.map(({ client, visited, noPurchase }) => (
+          filteredRouteClients.map(({ client, visited, noPurchase }) => (
             <ClientRouteItem
               key={client.id}
               client={client}
