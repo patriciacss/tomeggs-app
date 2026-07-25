@@ -42,6 +42,7 @@ export function SaleQuickModal({
   sale,
 }: SaleQuickModalProps) {
   const isEditing = Boolean(sale)
+  const [dateValue, setDateValue] = useState(sale?.date ?? todayISO())
   const [productType, setProductType] = useState<ProductType>(sale?.productType ?? 'jumbo-branco')
   const [unit, setUnit] = useState<SaleUnit>(sale?.unit ?? 'cartela')
   const [dozensText, setDozensText] = useState(sale ? String(sale.dozens).replace('.', ',') : '')
@@ -77,7 +78,7 @@ export function SaleQuickModal({
 
     if (sale) {
       saleService.update(sale.id, {
-        date: sale.date,
+        date: dateValue,
         productType,
         dozens: values.dozens,
         unit,
@@ -88,7 +89,7 @@ export function SaleQuickModal({
     } else {
       saleService.add({
         clientId: client.id,
-        date: todayISO(),
+        date: dateValue,
         productType,
         dozens: values.dozens,
         unit,
@@ -97,7 +98,7 @@ export function SaleQuickModal({
         paymentMethod,
       })
       if (markVisitedOnSave) {
-        visitService.markVisited(client.id, todayISO())
+        visitService.markVisited(client.id, dateValue)
       }
     }
     onSaved()
@@ -114,6 +115,13 @@ export function SaleQuickModal({
   return (
     <Modal title={isEditing ? `Editar venda — ${client.name}` : client.name} onClose={onClose}>
       <form className={styles.form} onSubmit={handleSubmit}>
+        <TextField
+          label="Data"
+          type="date"
+          value={dateValue}
+          onChange={setDateValue}
+        />
+
         <SelectField
           label="Tipo"
           options={PRODUCT_TYPES}

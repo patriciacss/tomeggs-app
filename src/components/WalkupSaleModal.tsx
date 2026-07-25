@@ -28,6 +28,7 @@ interface WalkupSaleModalProps {
 
 /** Registra uma venda avulsa, sem vínculo com um cliente cadastrado. */
 export function WalkupSaleModal({ onClose, onSaved }: WalkupSaleModalProps) {
+  const [dateValue, setDateValue] = useState(todayISO())
   const [customerName, setCustomerName] = useState('')
   const [productType, setProductType] = useState<ProductType>('jumbo-branco')
   const [unit, setUnit] = useState<SaleUnit>('cartela')
@@ -62,7 +63,7 @@ export function WalkupSaleModal({ onClose, onSaved }: WalkupSaleModalProps) {
 
     saleService.add({
       customerName: customerName.trim() || undefined,
-      date: todayISO(),
+      date: dateValue,
       productType,
       dozens: values.dozens,
       unit,
@@ -76,6 +77,8 @@ export function WalkupSaleModal({ onClose, onSaved }: WalkupSaleModalProps) {
   return (
     <Modal title="Venda avulsa" onClose={onClose}>
       <form className={styles.form} onSubmit={handleSubmit}>
+        <TextField label="Data" type="date" value={dateValue} onChange={setDateValue} />
+
         <TextField
           label="Nome do cliente (opcional)"
           placeholder="Ex: Venda na feira"
