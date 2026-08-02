@@ -5,7 +5,7 @@ import { EggBasketIcon, CoinIcon, CoopIcon } from '../components/FarmIcons'
 import styles from './HistoryPage.module.css'
 import { saleService } from '../services/saleService'
 import { clientService } from '../services/clientService'
-import { getSaleUnitLabel } from '../types'
+import { getSalePaidAmount, getSalePendingAmount, getSaleUnitLabel } from '../types'
 import { formatBRL } from '../utils/currency'
 import { formatFullDatePT, todayISO } from '../utils/date'
 
@@ -24,8 +24,8 @@ export function HistoryPage({ onBack }: HistoryPageProps) {
     let totalPending = 0
     for (const sale of allSales) {
       totalSold += sale.amount
-      if (sale.paid) totalReceived += sale.amount
-      else totalPending += sale.amount
+      totalReceived += getSalePaidAmount(sale)
+      totalPending += getSalePendingAmount(sale)
     }
     return { totalSold, totalReceived, totalPending }
   }, [allSales])
@@ -46,8 +46,8 @@ export function HistoryPage({ onBack }: HistoryPageProps) {
     let totalPending = 0
     for (const sale of salesForDate) {
       totalSold += sale.amount
-      if (sale.paid) totalReceived += sale.amount
-      else totalPending += sale.amount
+      totalReceived += getSalePaidAmount(sale)
+      totalPending += getSalePendingAmount(sale)
     }
     return { totalSold, totalReceived, totalPending }
   }, [salesForDate])
@@ -144,7 +144,7 @@ export function HistoryPage({ onBack }: HistoryPageProps) {
                   <div className={styles.saleTop}>
                     <span className={styles.clientName}>{name}</span>
                     <span className={sale.paid ? styles.pillPaid : styles.pillPending}>
-                      {sale.paid ? 'Pago' : 'Devendo'}
+                      {sale.paid ? 'Pago' : getSalePaidAmount(sale) > 0 ? 'Parcial' : 'Devendo'}
                     </span>
                   </div>
                   <span className={styles.saleAmount}>

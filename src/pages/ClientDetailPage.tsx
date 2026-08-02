@@ -3,6 +3,7 @@ import { ScreenHeader } from '../components/ui/ScreenHeader'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { SaleQuickModal } from '../components/SaleQuickModal'
+import { SettleDebtModal } from '../components/SettleDebtModal'
 import { MapChooserModal } from '../components/MapChooserModal'
 import { EggBasketIcon } from '../components/FarmIcons'
 import styles from './ClientDetailPage.module.css'
@@ -10,7 +11,7 @@ import { useClient } from '../hooks/useClient'
 import { useSales } from '../hooks/useSales'
 import { clientService } from '../services/clientService'
 import { visitService } from '../services/visitService'
-import { WEEKDAYS, getSaleUnitLabel } from '../types'
+import { WEEKDAYS, getSalePaidAmount, getSalePendingAmount, getSaleUnitLabel } from '../types'
 import type { Sale, Visit } from '../types'
 import { formatBRL } from '../utils/currency'
 import { formatDateBR } from '../utils/date'
@@ -33,6 +34,7 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
   const [visits, setVisits] = useState<Visit[]>([])
   const [showSaleModal, setShowSaleModal] = useState(false)
   const [showMap, setShowMap] = useState(false)
+  const [showSettleDebt, setShowSettleDebt] = useState(false)
   const [editingSale, setEditingSale] = useState<Sale | null>(null)
 
   useEffect(() => {
@@ -52,8 +54,9 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
     )
   }
 
-  const totalFaturado = sales.filter((sale) => sale.paid).reduce((sum, sale) => sum + sale.amount, 0)
-  const totalDevendo = sales.filter((sale) => !sale.paid).reduce((sum, sale) => sum + sale.amount, 0)
+  const totalFaturado = sales.reduce((sum, sale) => sum + getSalePaidAmount(sale), 0)
+  const pendingSales = sales.filter((sale) => !sale.paid)
+  const totalDevendo = pendingSales.reduce((sum, sale) => sum + getSalePendingAmount(sale), 0)
 
   // Visitas em que o cliente foi visitado mas não comprou (sem venda naquela data).
   const declinedDates = visits
@@ -155,6 +158,12 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
           Registrar venda
         </Button>
 
+        {pendingSales.length > 0 && (
+          <Button variant="secondary" fullWidth onClick={() => setShowSettleDebt(true)}>
+            Abater dívida
+          </Button>
+        )}
+
         <h2 className={styles.sectionTitle}>Histórico</h2>
 
         {timeline.length === 0 && (
@@ -184,7 +193,9 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
                       className={styles.pillPending}
                       onClick={() => markSalePaid(entry.sale.id, 'dinheiro')}
                     >
-                      Devendo · Marcar pago
+                      {getSalePaidAmount(entry.sale) > 0
+                        ? `Devendo ${formatBRL(getSalePendingAmount(entry.sale))} · Marcar pago`
+                        : 'Devendo · Marcar pago'}
                     </button>
                   )}
                   <button
@@ -211,6 +222,9 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
               </p>
               {entry.sale.paid && entry.sale.paymentMethod && (
                 <p className={styles.salePayment}>{PAYMENT_LABELS[entry.sale.paymentMethod]}</p>
+              )}
+              {!entry.sale.paid && getSalePaidAmount(entry.sale) > 0 && (
+                <p className={styles.salePayment}>Já pago: {formatBRL(getSalePaidAmount(entry.sale))}</p>
               )}
             </Card>
           ),
@@ -256,6 +270,18 @@ export function ClientDetailPage({ clientId, onBack, onEdit }: ClientDetailPageP
 
       {showMap && client.address && (
         <MapChooserModal address={client.address} onClose={() => setShowMap(false)} />
+      )}
+
+      {showSettleDebt && (
+        <SettleDebtModal
+          client={client}
+          pendingSales={pendingSales}
+          onClose={() => setShowSettleDebt(false)}
+          onSettled={() => {
+            refreshSales()
+            setShowSettleDebt(false)
+          }}
+        />
       )}
     </div>
   )

@@ -46,6 +46,7 @@ interface DbSale {
   unit: SaleUnit
   amount: number
   paid: boolean
+  amount_paid: number | null
   payment_method: PaymentMethod | null
   created_at: string
   updated_at: string
@@ -131,6 +132,7 @@ function toDbSale(sale: Sale, userId: string): DbSale {
     unit: sale.unit ?? 'cartela',
     amount: sale.amount,
     paid: sale.paid,
+    amount_paid: sale.amountPaid ?? null,
     payment_method: sale.paymentMethod ?? null,
     created_at: sale.createdAt,
     updated_at: sale.updatedAt ?? sale.createdAt,
@@ -149,6 +151,7 @@ function fromDbSale(row: DbSale): Sale {
     unit: row.unit ?? 'cartela',
     amount: row.amount,
     paid: row.paid,
+    amountPaid: row.amount_paid ?? undefined,
     paymentMethod: row.payment_method ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

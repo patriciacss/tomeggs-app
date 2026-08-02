@@ -1,7 +1,12 @@
 import { STORAGE_KEYS, storageService } from '../storage/storageService'
 import type { PaymentMethod, ProductType, Sale, SaleInput, SaleUnit } from '../types'
+import { getSalePendingAmount } from '../types'
 import { generateId } from '../utils/id'
 import { syncQueue } from './syncQueue'
+
+function round2(value: number): number {
+  return Math.round(value * 100) / 100
+}
 
 function normalizeSale(sale: Sale): Sale {
   return {
@@ -85,6 +90,9 @@ function update(id: string, input: SaleEditInput): Sale | undefined {
     ...sales[index],
     ...input,
     paymentMethod: input.paid ? input.paymentMethod : undefined,
+    // Mantém o valor já pago se a venda continuar em aberto (fiado), mas
+    // nunca deixa passar do novo valor total da venda.
+    amountPaid: input.paid ? undefined : Math.min(sales[index].amountPaid ?? 0, input.amount),
     updatedAt: new Date().toISOString(),
   }
   sales[index] = updated
@@ -93,7 +101,7 @@ function update(id: string, input: SaleEditInput): Sale | undefined {
   return updated
 }
 
-/** Marca uma venda como paga, informando a forma de pagamento usada. */
+/** Marca uma venda como totalmente paga, informando a forma de pagamento usada. */
 function markPaid(id: string, paymentMethod: PaymentMethod): Sale | undefined {
   const sales = getAll()
   const index = sales.findIndex((sale) => sale.id === id)
@@ -102,7 +110,35 @@ function markPaid(id: string, paymentMethod: PaymentMethod): Sale | undefined {
   const updated: Sale = {
     ...sales[index],
     paid: true,
+    amountPaid: undefined,
     paymentMethod,
+    updatedAt: new Date().toISOString(),
+  }
+  sales[index] = updated
+  saveAll(sales)
+  syncQueue.queue('sale', id)
+  return updated
+}
+
+/**
+ * Aplica um pagamento (total ou parcial) a uma venda em aberto, sem criar
+ * novos registros. Se o valor cobrir o restante, a venda vira totalmente paga.
+ */
+function applyPayment(id: string, amount: number, paymentMethod: PaymentMethod): Sale | undefined {
+  const sales = getAll()
+  const index = sales.findIndex((sale) => sale.id === id)
+  if (index === -1) return undefined
+
+  const sale = sales[index]
+  const pending = getSalePendingAmount(sale)
+  const newPending = round2(Math.max(0, pending - amount))
+  const fullyPaid = newPending <= 0.005
+
+  const updated: Sale = {
+    ...sale,
+    paid: fullyPaid,
+    amountPaid: fullyPaid ? undefined : round2(sale.amount - newPending),
+    paymentMethod: fullyPaid ? paymentMethod : sale.paymentMethod,
     updatedAt: new Date().toISOString(),
   }
   sales[index] = updated
@@ -124,9 +160,7 @@ function groupByDate(sales: Sale[]): Map<string, Sale[]> {
 
 /** Soma o total pendente (não pago) de um conjunto de vendas. */
 function totalPending(sales: Sale[]): number {
-  return sales
-    .filter((sale) => !sale.paid)
-    .reduce((sum, sale) => sum + sale.amount, 0)
+  return sales.reduce((sum, sale) => sum + getSalePendingAmount(sale), 0)
 }
 
 export const saleService = {
@@ -139,6 +173,7 @@ export const saleService = {
   removeByClient,
   removeOrphans,
   markPaid,
+  applyPayment,
   groupByDate,
   totalPending,
 }

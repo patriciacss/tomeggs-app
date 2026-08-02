@@ -106,10 +106,24 @@ export interface Sale {
   unit: SaleUnit
   amount: number
   paid: boolean
+  // Quanto já foi pago quando a venda está parcialmente quitada (paid ainda
+  // false). Ausente/0 quando nada foi pago; ignorado quando paid é true
+  // (nesse caso o valor pago é o amount inteiro).
+  amountPaid?: number
   paymentMethod?: PaymentMethod
   createdAt: string
   updatedAt?: string
   deleted?: boolean
+}
+
+/** Quanto já foi efetivamente pago de uma venda. */
+export function getSalePaidAmount(sale: Sale): number {
+  return sale.paid ? sale.amount : (sale.amountPaid ?? 0)
+}
+
+/** Quanto ainda falta pagar de uma venda. */
+export function getSalePendingAmount(sale: Sale): number {
+  return sale.amount - getSalePaidAmount(sale)
 }
 
 export type SaleInput = {

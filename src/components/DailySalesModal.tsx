@@ -2,7 +2,7 @@ import { Modal } from './ui/Modal'
 import styles from './DailySalesModal.module.css'
 import { saleService } from '../services/saleService'
 import { clientService } from '../services/clientService'
-import { getSaleUnitLabel } from '../types'
+import { getSalePaidAmount, getSaleUnitLabel } from '../types'
 import { formatBRL } from '../utils/currency'
 import { formatFullDatePT } from '../utils/date'
 
@@ -28,7 +28,7 @@ export function DailySalesModal({ date, onClose }: DailySalesModalProps) {
               <div className={styles.saleTop}>
                 <span className={styles.clientName}>{name}</span>
                 <span className={sale.paid ? styles.pillPaid : styles.pillPending}>
-                  {sale.paid ? 'Pago' : 'Devendo'}
+                  {sale.paid ? 'Pago' : getSalePaidAmount(sale) > 0 ? 'Parcial' : 'Devendo'}
                 </span>
               </div>
               <span className={styles.saleAmount}>

@@ -31,6 +31,7 @@ create table if not exists sales (
   unit text not null default 'cartela',
   amount numeric not null,
   paid boolean not null,
+  amount_paid numeric,
   payment_method text,
   created_at timestamptz not null,
   updated_at timestamptz not null,
@@ -63,6 +64,8 @@ alter table sales add column if not exists unit text not null default 'cartela';
 alter table sales add column if not exists customer_name text;
 -- Permite venda avulsa (sem cliente cadastrado), usada pelo botão "+".
 alter table sales alter column client_id drop not null;
+-- Guarda quanto já foi pago de uma venda em aberto (abatimento parcial de dívida).
+alter table sales add column if not exists amount_paid numeric;
 
 create index if not exists clients_updated_at_idx on clients (updated_at);
 create index if not exists sales_updated_at_idx on sales (updated_at);

@@ -3,6 +3,7 @@ import { clientService } from '../services/clientService'
 import { saleService } from '../services/saleService'
 import { visitService } from '../services/visitService'
 import type { PaymentMethod } from '../types'
+import { getSalePaidAmount, getSalePendingAmount } from '../types'
 import { todayISO, todayWeekday } from '../utils/date'
 
 export interface DailySummary {
@@ -41,12 +42,13 @@ export function useDailySummary(date: string = todayISO()) {
 
     for (const sale of sales) {
       totalSold += sale.amount
+      totalReceived += getSalePaidAmount(sale)
+      totalPending += getSalePendingAmount(sale)
+
       if (sale.paid && sale.paymentMethod) {
-        totalReceived += sale.amount
         totalsByMethod[sale.paymentMethod] += sale.amount
       } else {
-        totalPending += sale.amount
-        totalsByMethod.fiado += sale.amount
+        totalsByMethod.fiado += getSalePendingAmount(sale)
       }
     }
 

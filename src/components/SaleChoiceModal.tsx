@@ -2,7 +2,7 @@ import { Modal } from './ui/Modal'
 import { Button } from './ui/Button'
 import styles from './SaleChoiceModal.module.css'
 import type { Client, Sale } from '../types'
-import { getSaleUnitLabel } from '../types'
+import { getSalePaidAmount, getSaleUnitLabel } from '../types'
 import { formatBRL } from '../utils/currency'
 
 interface SaleChoiceModalProps {
@@ -38,7 +38,7 @@ export function SaleChoiceModal({
               >
                 <span className={styles.saleRowInfo}>
                   {sale.dozens} {getSaleUnitLabel(sale.unit, sale.dozens)} · {formatBRL(sale.amount)} ·{' '}
-                  {sale.paid ? 'Pago' : 'Devendo'}
+                  {sale.paid ? 'Pago' : getSalePaidAmount(sale) > 0 ? 'Parcial' : 'Devendo'}
                 </span>
                 <span className={styles.saleRowEdit}>Editar</span>
               </button>
